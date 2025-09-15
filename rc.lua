@@ -282,8 +282,6 @@ local tasklist_buttons = gears.table.join(
   end)
 )
 
-
-
 appMenu = require("appMenu")
 audioIndicator = require("audio_indicator")
 micIndicator = require("microphone_indicator")
@@ -294,7 +292,6 @@ themeChanger = require("theme_changer")
 twitchIndicator = require("twitch_indicator")
 volumeIndicator = require("volume_indicator")
 weatherIndicator = require("weather_indicator")
---twitterIndicator = require("twitter_indicator")
 
 
 -- Wallpaper.
