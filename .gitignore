@@ -39,3 +39,6 @@ luac.out
 *.x86_64
 *.hex
 
+# Images in the ./themes directory.
+themes/*/*.png
+themes/*/*.svg
