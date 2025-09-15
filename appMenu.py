@@ -1,1 +1,0 @@
-/archive/Programmierung/Python/appMenu_GTK/main.py
