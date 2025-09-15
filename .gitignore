@@ -42,3 +42,6 @@ luac.out
 # Images in the ./themes directory.
 themes/*/*.png
 themes/*/*.svg
+
+appMenu.py
+audioSwitching.py
