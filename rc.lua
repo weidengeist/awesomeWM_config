@@ -713,6 +713,7 @@ clientkeys = gears.table.join(
   awful.key({modkey, }, "Left",
     function (c)
       local coords = mouse.coords()
+      awful.client.setslave(c) -- The client is put at the end of the task list of the screen it is moved to.
       c:move_to_screen(c.screen.index-1)
       mouse.coords{x = coords.x, y = coords.y}
     end,
@@ -721,6 +722,7 @@ clientkeys = gears.table.join(
   awful.key({modkey, }, "Right",
     function (c)
       local coords = mouse.coords()
+      awful.client.setslave(c) -- The client is put at the end of the task list of the screen it is moved to.
       c:move_to_screen(c.screen.index+1)
       mouse.coords{x = coords.x, y = coords.y}
     end,
@@ -731,25 +733,33 @@ clientkeys = gears.table.join(
   -----------------------------------
   awful.key({modkey, "Control"}, "Left",
     function (c)
-      c.x = c.x - 1
+      if not c.fullscreen and not c.maximized then
+        c.x = c.x - 1
+      end
     end,
     {description = "move left by one pixel", group = "client"}
   ),
   awful.key({modkey, "Control"}, "Right",
     function (c)
-      c.x = c.x + 1
+      if not c.fullscreen and not c.maximized then
+        c.x = c.x + 1
+      end
     end,
     {description = "move right by one pixel", group = "client"}
   ),
   awful.key({modkey, "Control"}, "Up",
     function (c)
-      c.y = c.y - 1
+      if not c.fullscreen and not c.maximized then
+        c.y = c.y - 1
+      end
     end,
     {description = "move up by one pixel", group = "client"}
   ),
   awful.key({modkey, "Control"}, "Down",
     function (c)
-      c.y = c.y + 1
+      if not c.fullscreen and not c.maximized then
+        c.y = c.y + 1
+      end
     end,
     {description = "move down by one pixel", group = "client"}
   ),
