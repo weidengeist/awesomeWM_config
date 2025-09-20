@@ -441,7 +441,9 @@ function changeThemeColors()
   end
 
   for _, c in ipairs(client.get()) do
-    c:emit_signal("request::titlebars")
+    if not c.requests_no_titlebar then
+      c:emit_signal("request::titlebars")
+    end
     c.border_color = beautiful.border_normal
   end
 
