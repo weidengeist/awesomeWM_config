@@ -237,12 +237,13 @@ controlLayout:add_at(songInfo, songInfo.coords)
     #############################]]
 
 function setIdlePlayback()
-  --~ awful.spawn.easy_async('lua '..confDir..'mpd_backend.lua "idle player"', function()
-    --~ seeker.timer:again()
-    --~ seeker:update()
-    --~ songInfo:update()
-    --~ setIdlePlayback()
-  --~ end)
+  -- mpd_backend.lua requires package lua-socket.
+  awful.spawn.easy_async('lua '..confDir..'mpd_backend.lua "idle player"', function(a, b, c, d)
+    seeker.timer:again()
+    seeker:update()
+    songInfo:update()
+    setIdlePlayback()
+  end)
 end
 
 mpdTimer = timer{
@@ -260,68 +261,66 @@ mpdTimer = timer{
 }
 
 function songInfo:update()
-  --~ awful.spawn.easy_async('lua '..confDir..'mpd_backend.lua "status state"', function(state)
-    --~ if state:match("stop") then
-      --~ self:get_all_children()[1].markup = "<b>Stopped</b>"
-    --~ else
-      --~ awful.spawn.easy_async('lua '..confDir..'mpd_backend.lua "song"', function(song)
-        --~ if #song > 0 then
-          --~ local artist = song:match("Artist: (.-)\n"):gsub("&", "&amp;")
-          --~ local album = song:match("Album: (.-)\n"):gsub("&", "&amp;")
-          --~ local date = song:match("Date: (.-)\n")
-          --~ local title = song:match("Title: (.-)\n"):gsub("&", "&amp;")
-          --~ local file = song:match("file: (.-)\n")
+  awful.spawn.easy_async('lua '..confDir..'mpd_backend.lua "status state"', function(state)
+    if state:match("stop") then
+      self:get_all_children()[1].markup = "<b>Stopped</b>"
+    else
+      awful.spawn.easy_async('lua '..confDir..'mpd_backend.lua "song"', function(song)
+        if #song > 0 then
+          local artist = song:match("Artist: (.-)\n"):gsub("&", "&amp;")
+          local album = song:match("Album: (.-)\n"):gsub("&", "&amp;")
+          local date = song:match("Date: (.-)\n")
+          local title = song:match("Title: (.-)\n"):gsub("&", "&amp;")
+          local file = song:match("file: (.-)\n")
           
-          --~ local currentSong = self:get_all_children()[1].markup
+          local currentSong = self:get_all_children()[1].markup
 
-          --~ if not currentSong:match("<b>"..title.."</b>") or not currentSong:match(artist) then
-            --~ if not currentSong:match(album) or not currentSong:match(artist) then
-              --~ local songDir = musicDir.."/"..file:match("(.*)/.*")
-              --~ print("songdir", songDir)
-              --~ awful.spawn.easy_async([[find "]]..songDir..[[" -regextype sed -maxdepth 1 -regex ".*cover\.\(jpe\?g\|png\)"]], function(coverPath)
-                --~ print("cover", coverPath)
-                --~ if coverPath and coverPath ~= "" then
-                  --~ cover.image = coverPath:gsub("\n$","")
-                --~ end
-              --~ end)
-            --~ end
-            --~ -- put title, artist and album in [[…]] to prevent problems with »&« symbols
-            --~ self:get_all_children()[1].markup = "<b>"..title.."</b>\nby "..artist.." from »"..album.."« ("..date..")"
-            --~ collectgarbage("collect")
-          --~ end
-        --~ end
-        --~ collectgarbage("collect")
-      --~ end)
-    --~ end
-    --~ collectgarbage("collect")
-  --~ end)
-  --~ collectgarbage("collect")
+          if not currentSong:match("<b>"..title.."</b>") or not currentSong:match(artist) then
+            if not currentSong:match(album) or not currentSong:match(artist) then
+              local songDir = musicDir.."/"..file:match("(.*)/.*")
+              awful.spawn.easy_async([[find "]]..songDir..[[" -regextype sed -maxdepth 1 -regex ".*cover\.\(jpe\?g\|png\)"]], function(coverPath)
+                if coverPath and coverPath ~= "" then
+                  cover.image = coverPath:gsub("\n$","")
+                end
+              end)
+            end
+            -- put title, artist and album in [[…]] to prevent problems with »&« symbols
+            self:get_all_children()[1].markup = "<b>"..title.."</b>\nby "..artist.." from »"..album.."« ("..date..")"
+            collectgarbage("collect")
+          end
+        end
+        collectgarbage("collect")
+      end)
+    end
+    collectgarbage("collect")
+  end)
+  collectgarbage("collect")
 end
 
 -----------------------------------------------------
 -- update seeker, song info, and play button state --
 -----------------------------------------------------
 function seeker:update()
-  --~ awful.spawn.easy_async('lua '..confDir..'mpd_backend.lua "status"', function(status)
-    --~ local progressbar = self:get_all_children()[1]
-    --~ local textWidget = self:get_all_children()[3]
+  awful.spawn.easy_async('lua '..confDir..'mpd_backend.lua "status"', function(status)
+    local progressbar = self:get_all_children()[1]
+    local textWidget = self:get_all_children()[3]
 
-    --~ local state = status:match('state: (%a+)') or ""
+    local state = status:match('state: (%a+)') or ""
     
-    --~ if state:match("stop") then
-      --~ playButton.image = beautiful.icons_path.."/actions/16/media-playback-start.png"
-      --~ progressbar.value = 0
-      --~ textWidget.text = ""
-    --~ elseif state:match("pause") then
-      --~ playButton.image = beautiful.icons_path.."/actions/16/media-playback-start.png"
-    --~ elseif state:match("play") then
-      --~ playButton.image = beautiful.icons_path.."/actions/16/media-playback-pause.png"
-      --~ songPos, songTime = status:match('time: (%d+):(%d+)')
-      --~ progressbar.value = tonumber(songPos / songTime)
-      --~ textWidget.text = secondsToTime(songPos).."/"..secondsToTime(songTime)
-    --~ end
-  --~ collectgarbage("collect")
-  --~ end)
+    if state:match("stop") then
+      playButton.image = beautiful.icons_path.."/actions/16/media-playback-start.png"
+      progressbar.value = 0
+      textWidget.text = ""
+    elseif state:match("pause") then
+      playButton.image = beautiful.icons_path.."/actions/16/media-playback-start.png"
+    elseif state:match("play") then
+      playButton.image = beautiful.icons_path.."/actions/16/media-playback-pause.png"
+      songPos, songTime = status:match('time: (%d+):(%d+)')
+      progressbar.value = tonumber(songPos / songTime)
+      textWidget.text = secondsToTime(songPos).."/"..secondsToTime(songTime)
+    end
+    collectgarbage("collect")
+  end)
 end
 
 ------------------------------------------------
@@ -334,7 +333,7 @@ seeker:buttons(
         local relPos = (mouse.coords().x - controlPanel.x - seeker.coords.x) / seeker:get_all_children()[1].forced_width
         seeker:get_all_children()[1].value = relPos
         awful.spawn.easy_async('lua '..confDir..'mpd_backend.lua "song duration"', function(dur)
-          awful.spawn.easy_async('lua '..confDir..'mpd_backend.lua "seek '..(relPos * tonumber(dur))..'"', function()
+          awful.spawn.easy_async('lua '..confDir..'mpd_backend.lua "seek '..(relPos * tonumber(dur))..'"', function(a, b, c, d)
             seeker:update()
           end)
         end)
@@ -440,6 +439,7 @@ indicator:connect_signal("button::press", function(_,_,_,button,_,geo)
     if controlPanel.visible then
       songInfo:update()
       seeker:update()
+      seeker.timer:again()
     end
   elseif button == 3 then
     --awful.spawn.easy_async('lua /archive/.tmp/mpd_frontend.lua', function() end)
@@ -456,7 +456,7 @@ indicator:connect_signal("button::press", function(_,_,_,button,_,geo)
     end
     if spawnable then
       print('python '..filesystem.get_xdg_config_home():match("(.*/).config")..".scripts/mpd_gui.py")
-      awful.spawn.easy_async('python '..filesystem.get_xdg_config_home():match("(.*/).config")..".scripts/mpd_gui.py", function(a, b, c, d) print(a, b, c, d) end)
+      awful.spawn.easy_async('python '..filesystem.get_xdg_config_home():match("(.*/).config")..".scripts/mpd_gui.py", function() end)
     end
   elseif button == 4 then
     awful.spawn.easy_async('lua '..confDir..'mpd_backend.lua "status"', function(status)
